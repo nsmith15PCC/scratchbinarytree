@@ -8,26 +8,24 @@ using namespace std;
 
 int main()
 {
-    bst<int> mybst(PREORDER);
-    srand (time(NULL));
+    srand(time(NULL));
+    bst<int> mybst;
 
-    for (size_t i = 0; i < 15; ++i)
+    for (size_t i = 0; i < 100; ++i)
     {
-        mybst.insert(rand()%10);
-        cout<<"Insertion Round "<<i<<": "<<endl<<mybst<<endl;
+        int toinsert = rand() % 40;
+        cout<<"Inserting: "<<toinsert<<endl;
+        mybst.insert(toinsert);
+        cout<<mybst<<endl;
+        cout<<"Size = "<<mybst.size()<<", Balanced = "<<( mybst.balanced() ? "True" : "False" )<<endl;
     }
 
-    cout<<"Successfully inserted, beginning removal!"<<endl
-       <<"Full bst = "<<endl<<mybst<<endl<<"Size = "<<mybst.size()<<endl;
-    for (int i = 0; i < 10; ++i)
-    {
-        mybst.remove(i, mybst.find(i));
-        cout<<"Round "<<i<<": "<<endl<<mybst<<endl<<"Size = "<<mybst.size()<<endl;
-    }
+    cout<<"Balancing!"<<endl;
 
-    mybst.clear();
-    cout<<"Cleared: "<<mybst<<endl<<"Size = "<<mybst.size()<<endl;
+    mybst.balance();
 
+    cout<<mybst<<endl;
+    cout<<"Size = "<<mybst.size()<<", Balanced = "<<( mybst.balanced() ? "True" : "False" )<<endl;
 
     return 0;
 }

@@ -29,6 +29,10 @@ public:
 
     void clear();
 
+    bool balanced() const;
+    void balance();
+
+
     void insert(const data_type &d, size_t s = 1);
     void remove(const data_type &d, size_t s = 1);
 
@@ -56,6 +60,14 @@ private:
     void insertHELPER(const data_type &d, size_t s, node<data_type>* &r);
     size_t findHELPER (const data_type &d, node<data_type>* r);
     bool removeHELPER(const data_type &d, size_t s, node<data_type>*& r);
+
+    int depth(const node<data_type>* r) const;
+
+    void tree_to_vine (node<data_type> *&root, int &size );
+    void vine_to_tree ( node<data_type>* &root, int size );
+    int FullSize ( int size );
+    void compression ( node<data_type>* &root, int count );
+
 };
 
 template <typename data_type>
@@ -128,6 +140,27 @@ void bst<data_type>::clear()
 }
 
 template <typename data_type>
+bool bst<data_type>::balanced() const
+{
+    if (theroot)
+        return (abs(depth(theroot->child(LEFT)) - depth (theroot->child(RIGHT))) <= 1);
+    else return 1;
+}
+
+template <typename data_type>
+void bst<data_type>::balance()
+{
+    int size = 0;
+    node<data_type>* dummy = new node<data_type>();
+    dummy->child(RIGHT) = theroot;
+    tree_to_vine(dummy, size);
+    vine_to_tree(dummy, size);
+    theroot = dummy->child(RIGHT);
+    delete dummy;
+}
+
+
+template <typename data_type>
 void bst<data_type>::insert(const data_type &d, size_t s)
 {
     insertHELPER(d, s, theroot);
@@ -165,6 +198,7 @@ node<data_type>* bst<data_type>::find_max (node<data_type>* r)
 {
     while(r->child(RIGHT))
         r = r->child(RIGHT);
+    return r;
 }
 
 template <typename data_type>
@@ -249,7 +283,75 @@ bool bst<data_type>::removeHELPER(const data_type &d, size_t s, node<data_type>*
     }
     else
         return 0;
-
 }
+
+template <typename data_type>
+int bst<data_type>::depth(const node<data_type>* r) const
+{
+    if (r)
+        return (1 + std::max(depth(r->child(LEFT)), depth(r->child(RIGHT) ) ) ) ;
+    else
+        return 0;
+}
+
+template <typename data_type>
+void bst<data_type>::tree_to_vine ( node<data_type> *&root, int &size )
+{
+    node<data_type> *vineTail, *remainder, *tempPtr;
+
+    vineTail = root;
+    remainder = vineTail->child(RIGHT);
+    size = 0;
+    while ( remainder != NULL )
+    {
+        if ( remainder->child(LEFT) == NULL )
+        {  vineTail = remainder;
+            remainder = remainder->child(RIGHT);
+            size++;
+        }
+        else
+        {  tempPtr = remainder->child(LEFT);
+            remainder->child(LEFT) = tempPtr->child(RIGHT);
+            tempPtr->child(RIGHT) = remainder;
+            remainder = tempPtr;
+            vineTail->child(RIGHT) = tempPtr;
+        }
+    }
+}
+
+template<typename data_type>
+int bst<data_type>::FullSize (int size)
+{
+    int Rtn = 1;
+    while ( Rtn <= size )
+        Rtn = Rtn + Rtn + 1;
+    return Rtn/2;
+}
+
+template <typename data_type>
+void bst<data_type>::vine_to_tree ( node<data_type>* &root, int size )
+{
+    int full_count = FullSize (size);
+    compression(root, size - full_count);
+    for ( size = full_count ; size > 1 ; size /= 2 )
+        compression ( root, size / 2 );
+}
+
+template <typename data_type>
+void bst<data_type>::compression ( node<data_type>* &root, int count )
+{
+    node<data_type>* scanner = root;
+
+    for ( int j = 0; j < count; j++ )
+    {
+        node<data_type>* child = scanner->child(RIGHT);
+        scanner->child(RIGHT) = child->child(RIGHT);
+        scanner = scanner->child(RIGHT);
+        child->child(RIGHT) = scanner->child(LEFT);
+        scanner->child(LEFT) = child;
+    }
+}
+
+
 
 #endif // BST
