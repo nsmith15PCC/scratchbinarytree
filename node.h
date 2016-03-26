@@ -29,7 +29,7 @@ public:
     const size_t& count() const;
 
     node<data_type>*& child (DIRECTION which);
-    const node<data_type>*& child (DIRECTION which) const;
+    const node<data_type> *child(DIRECTION which) const;
 
     node<data_type>& operator+=(size_t v);
 
@@ -224,7 +224,7 @@ node<data_type>*& node<data_type>::child (DIRECTION which)
 }
 
 template <typename data_type>
-const node<data_type> *&node<data_type>::child(DIRECTION which) const
+const node<data_type> *node<data_type>::child(DIRECTION which) const
 {
     return children[which];
 }
