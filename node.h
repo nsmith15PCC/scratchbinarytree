@@ -2,11 +2,14 @@
 #define NODE
 
 #include <iostream>
+#include <iomanip>
 
 enum DIRECTION {LEFT, RIGHT};
 
 using std::ostream;
 using std::istream;
+using std::setw;
+using std::endl;
 
 template <typename data_type>
 class node
@@ -15,8 +18,9 @@ public:
     node(const data_type &D = data_type(), size_t C = 1);
     ~node();
 
-    node(const node<T> &other);
-    node<data_type>& operator=(const node<T> &other);
+    node(const node<data_type> &other);
+    node<data_type>& operator=(const node<data_type> &other);
+    node<data_type>& operator=(const data_type &other);
 
     data_type& data();
     const data_type& data() const;
@@ -25,7 +29,7 @@ public:
     const size_t& count() const;
 
     node<data_type>*& child (DIRECTION which);
-    const node<data_type>* child (DIRECTION which) const;
+    const node<data_type>*& child (DIRECTION which) const;
 
     node<data_type>& operator+=(size_t v);
 
@@ -36,6 +40,15 @@ public:
 
     int operator--();
     int operator--(int);
+
+    // Traversals
+    static void preorder(ostream& outs, node<data_type>* r, size_t indent = 0);
+
+    static void inorder(ostream& outs, node<data_type>* r, size_t indent = 0);
+
+    static void postorder(ostream& outs, node<data_type>* r, size_t indent = 0);
+
+    static void (*trav_ptr[3])(ostream&, node<data_type>*, size_t);
 
 
     // Node to Node comparisons
@@ -135,12 +148,13 @@ private:
     node<data_type>* children[2];
 };
 
+
 template <typename data_type>
-node<data_type>::node(const data_type &D = data_type(), size_t C = 1)
+node<data_type>::node(const data_type &D, size_t C)
 {
     thedata = D;
     thecount = C;
-    children[] = {NULL};
+    children[0] = children[1] = NULL;
 }
 
 template <typename data_type>
@@ -152,7 +166,7 @@ node<data_type>::~node()
 }
 
 template <typename data_type>
-node<data_type>::node(const node<T> &other)
+node<data_type>::node(const node<data_type> &other)
 {
     thedata = other.thedata;
     thecount = other.thecount;
@@ -160,7 +174,7 @@ node<data_type>::node(const node<T> &other)
 }
 
 template <typename data_type>
-node<data_type>& node<data_type>::operator=(const node<T> &other)
+node<data_type>& node<data_type>::operator=(const node<data_type> &other)
 {
     if (this != &other)
     {
@@ -168,6 +182,14 @@ node<data_type>& node<data_type>::operator=(const node<T> &other)
         thecount = other.thecount;
         children[0] = children[1] = NULL;
     }
+    return *this;
+}
+
+template <typename data_type>
+node<data_type>& node<data_type>::operator=(const data_type &other)
+{
+
+    thedata = other;
     return *this;
 }
 
@@ -202,7 +224,7 @@ node<data_type>*& node<data_type>::child (DIRECTION which)
 }
 
 template <typename data_type>
-const node<data_type>* node<data_type>::child (DIRECTION which) const
+const node<data_type> *&node<data_type>::child(DIRECTION which) const
 {
     return children[which];
 }
@@ -250,6 +272,43 @@ int node<data_type>::operator--(int)
     thecount--;
     return temp;
 }
+
+template <typename data_type>
+void node<data_type>::preorder(ostream& outs, node<data_type>* r, size_t indent)
+{
+    if (r)
+    {
+        outs<<setw(indent)<<""<<r->data()<<" ["<<r->count()<<"] "<<endl;
+        preorder(outs, r->children[LEFT], indent+4);
+        preorder(outs, r->children[RIGHT],indent+4);
+    }
+}
+
+template <typename data_type>
+void node<data_type>::inorder(ostream& outs, node<data_type>* r, size_t indent)
+{
+    if (r)
+    {
+        inorder(outs, r->children[LEFT], indent+4);
+        outs<<setw(indent)<<""<<r->data()<<" ["<<r->count()<<"] "<<endl;
+        inorder(outs, r->children[RIGHT], indent+4);
+    }
+}
+
+template <typename data_type>
+void node<data_type>::postorder(ostream& outs, node<data_type>* r, size_t indent)
+{
+    if (r)
+    {
+        postorder(outs, r->children[LEFT], indent+4);
+        postorder(outs, r->children[RIGHT], indent+4);
+        outs<<setw(indent)<<""<<r->data()<<" ["<<r->count()<<"] "<<endl;
+    }
+}
+
+template <typename data_type>
+void (*node<data_type>::trav_ptr[])(ostream&, node<data_type>*, size_t) = {&node<data_type>::preorder, &node<data_type>::inorder, &node<data_type>::postorder};
+
 
 // Node to Node comparisons
 
@@ -375,7 +434,7 @@ istream& operator>>(istream& ins, node<D>& n)
 {
     D temp;
     ins >> temp;
-    n = node(temp);
+    n = node<D>(temp);
     return ins;
 }
 
