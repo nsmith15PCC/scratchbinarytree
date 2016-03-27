@@ -38,7 +38,7 @@ public:
 
 
     void insert(const data_type &d, size_t s = 1);
-    void remove(const data_type &d, size_t s = 1);
+    bool remove(const data_type &d, size_t s = 1);
 
     size_t find (const data_type &d);
 
@@ -54,15 +54,15 @@ private:
     node<data_type>* theroot;
     TRAVERSAL_TYPE thetraversal;
 
-    void copy (const bst<data_type> &other);
+    void copy (const node<data_type>* r);
     node<data_type> *find_max(node<data_type>* r);
 
     size_t sizeHELPER(node<data_type> *r);
     void clearHELPER(node<data_type> *&r);
     void insertHELPER(const data_type &d, size_t s, node<data_type>* &r);
     size_t findHELPER (const data_type &d, node<data_type>* r);
-    void removeHELPER(const data_type &d, size_t s, node<data_type>*& r);
-    void removeMAX(node<data_type> *&r, data_type &d, size_t &c);
+    bool removeHELPER(const data_type &d, size_t s, node<data_type>*& r);
+    bool removeMAX(node<data_type> *&r, data_type &d, size_t &c);
 
     int depth(const node<data_type>* r) const;
 
@@ -89,14 +89,14 @@ bst<data_type>::~bst()
 template <typename data_type>
 bst<data_type>::bst(const bst<data_type> &other)
 {
-    copy(other);
+    copy(other.theroot);
 }
 
 template <typename data_type>
 bst<data_type> bst<data_type>::operator=(const bst<data_type> &other)
 {
     if (this != &other)
-        copy (other);
+        copy (other.theroot);
     return *this;
 }
 
@@ -170,16 +170,27 @@ void bst<data_type>::insert(const data_type &d, size_t s)
 }
 
 template <typename data_type>
-void bst<data_type>::remove(const data_type &d, size_t s)
+bool bst<data_type>::remove(const data_type &d, size_t s)
 {
     if (find(d))
-        removeHELPER(d, s, theroot);
+        return removeHELPER(d, s, theroot);
 }
 
 template <typename data_type>
 size_t bst<data_type>::find (const data_type &d)
 {
     return findHELPER(d, theroot);
+}
+
+template <typename data_type>
+void bst<data_type>::copy(const node<data_type> *r)
+{
+    if (r)
+    {
+    insert(r->data(), r->count());
+    copy(r->child(LEFT));
+    copy(r->child(RIGHT));
+    }
 }
 
 template <typename D>
@@ -257,17 +268,17 @@ size_t bst<data_type>::findHELPER (const data_type &d, node<data_type>* r)
 }
 
 template<typename data_type>
-void bst<data_type>::removeHELPER(const data_type &d, size_t s, node<data_type>*& r)
+bool bst<data_type>::removeHELPER(const data_type &d, size_t s, node<data_type>*& r)
 {
     if (r)
     {
         if (d != *r)
-            removeHELPER(d,s, r->child((DIRECTION)(*r < d)));
+            return removeHELPER(d,s, r->child((DIRECTION)(*r < d)));
         else
             if (s < r->count())
             {
                 *r -= s;
-                return;
+                return 1;
             }
             else
                 if (!(r->child(LEFT)))
@@ -275,21 +286,22 @@ void bst<data_type>::removeHELPER(const data_type &d, size_t s, node<data_type>*
                     node<data_type> *delete_ptr = r;
                     r = r->child(RIGHT);
                     delete delete_ptr;
-                    return;
+                    return 1;
                 }
                 else
-                    removeMAX(r->child(LEFT), r->data(), r->count());
+                    return removeMAX(r->child(LEFT), r->data(), r->count());
+
     }
     else
-        return;
+        return 0;
 }
 
 template <typename data_type>
-void bst<data_type>::removeMAX(node<data_type>*& r, data_type& d, size_t &c)
+bool bst<data_type>::removeMAX(node<data_type>*& r, data_type& d, size_t &c)
 {
     if (r->child(RIGHT))
     {
-        removeMAX(r->child(RIGHT), d, c);
+        return removeMAX(r->child(RIGHT), d, c);
     }
     else
     {
@@ -298,6 +310,7 @@ void bst<data_type>::removeMAX(node<data_type>*& r, data_type& d, size_t &c)
         node<data_type> *delete_ptr = r;
         r = r->child(LEFT);
         delete delete_ptr;
+        return 1;
     }
 }
 
