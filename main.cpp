@@ -11,21 +11,28 @@ int main()
     srand(time(NULL));
     bst<int> mybst;
 
-    for (size_t i = 0; i < 100; ++i)
-    {
-        int toinsert = rand() % 40;
-        cout<<"Inserting: "<<toinsert<<endl;
-        mybst.insert(toinsert);
-        cout<<mybst<<endl;
-        cout<<"Size = "<<mybst.size()<<", Balanced = "<<( mybst.balanced() ? "True" : "False" )<<endl;
-    }
-
-    cout<<"Balancing!"<<endl;
-
-    mybst.balance();
+    for (int i = 99; i >= 0; --i)
+        mybst.insert(rand()%20);
 
     cout<<mybst<<endl;
-    cout<<"Size = "<<mybst.size()<<", Balanced = "<<( mybst.balanced() ? "True" : "False" )<<endl;
+    cout<<"Size = "<<mybst.size()<<", Balanced = "<<mybst.balanced()<<endl;
 
+    mybst.balance();
+    cout<<mybst<<endl;
+
+    cout<<"Size = "<<mybst.size()<<", Balanced = "<<mybst.balanced()<<endl;
+
+    while (!mybst.empty())
+    {
+        int toremove = rand()%20;
+        cout<<"Removing "<<toremove<<endl;
+        mybst.remove(toremove, mybst.find(toremove));
+        cout<<mybst<<endl;
+
+        cout<<"Size = "<<mybst.size()<<", Balanced = "<<mybst.balanced()<<endl;
+
+    }
+
+    cout<<"SUCCESS!"<<endl;
     return 0;
 }

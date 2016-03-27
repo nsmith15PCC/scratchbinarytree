@@ -20,7 +20,7 @@ public:
 
     node(const node<data_type> &other);
     node<data_type>& operator=(const node<data_type> &other);
-    node<data_type>& operator=(const data_type &other);
+//    node<data_type>& operator=(const data_type &other);
 
     data_type& data();
     const data_type& data() const;
@@ -185,13 +185,13 @@ node<data_type>& node<data_type>::operator=(const node<data_type> &other)
     return *this;
 }
 
-template <typename data_type>
-node<data_type>& node<data_type>::operator=(const data_type &other)
-{
+//template <typename data_type>
+//node<data_type>& node<data_type>::operator=(const data_type &other)
+//{
 
-    thedata = other;
-    return *this;
-}
+//    thedata = other;
+//    return *this;
+//}
 
 template <typename data_type>
 data_type& node<data_type>::data()

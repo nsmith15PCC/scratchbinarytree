@@ -5,6 +5,10 @@
 #include <algorithm>
 #include "node.h"
 
+using std::cout;
+using std::swap;
+using std::max;
+
 enum TRAVERSAL_TYPE {PREORDER, INORDER, POSTORDER};
 enum BSTERRORS {EMPTY};
 
@@ -51,15 +55,14 @@ private:
     TRAVERSAL_TYPE thetraversal;
 
     void copy (const bst<data_type> &other);
-    node<data_type>* find_max (node<data_type>* r);
-    node<data_type>* find_min (node<data_type>* r);
-    node<data_type>* find_parent (const data_type &d);
+    node<data_type> *find_max(node<data_type>* r);
 
     size_t sizeHELPER(node<data_type> *r);
     void clearHELPER(node<data_type> *&r);
     void insertHELPER(const data_type &d, size_t s, node<data_type>* &r);
     size_t findHELPER (const data_type &d, node<data_type>* r);
-    bool removeHELPER(const data_type &d, size_t s, node<data_type>*& r);
+    void removeHELPER(const data_type &d, size_t s, node<data_type>*& r);
+    void removeMAX(node<data_type> *&r, data_type &d, size_t &c);
 
     int depth(const node<data_type>* r) const;
 
@@ -169,7 +172,8 @@ void bst<data_type>::insert(const data_type &d, size_t s)
 template <typename data_type>
 void bst<data_type>::remove(const data_type &d, size_t s)
 {
-    removeHELPER(d, s, theroot);
+    if (find(d))
+        removeHELPER(d, s, theroot);
 }
 
 template <typename data_type>
@@ -194,9 +198,9 @@ ostream& operator<<(ostream& outs, const bst<D> &b)
 }
 
 template <typename data_type>
-node<data_type>* bst<data_type>::find_max (node<data_type>* r)
+node<data_type> *bst<data_type>::find_max(node<data_type>* r)
 {
-    while(r->child(RIGHT))
+    while(r->child(RIGHT)->child(RIGHT))
         r = r->child(RIGHT);
     return r;
 }
@@ -253,37 +257,50 @@ size_t bst<data_type>::findHELPER (const data_type &d, node<data_type>* r)
 }
 
 template<typename data_type>
-bool bst<data_type>::removeHELPER(const data_type &d, size_t s, node<data_type>*& r)
+void bst<data_type>::removeHELPER(const data_type &d, size_t s, node<data_type>*& r)
 {
     if (r)
     {
         if (d != *r)
-            return removeHELPER(d,s, r->child((DIRECTION)(*r < d)));
+            removeHELPER(d,s, r->child((DIRECTION)(*r < d)));
         else
             if (s < r->count())
             {
                 *r -= s;
-                return 1;
+                return;
             }
             else
-                if (!r->child(LEFT))
+                if (!(r->child(LEFT)))
                 {
                     node<data_type> *delete_ptr = r;
                     r = r->child(RIGHT);
                     delete delete_ptr;
-                    return 1;
+                    return;
                 }
                 else
-                {
-                    node<data_type> *swap_ptr = find_max(r->child(LEFT));
-                    std::swap (r->data(), swap_ptr->data());
-                    std::swap (r->count(), swap_ptr->count());
-                    return removeHELPER (d, s, swap_ptr);
-                }
+                    removeMAX(r->child(LEFT), r->data(), r->count());
     }
     else
-        return 0;
+        return;
 }
+
+template <typename data_type>
+void bst<data_type>::removeMAX(node<data_type>*& r, data_type& d, size_t &c)
+{
+    if (r->child(RIGHT))
+    {
+        removeMAX(r->child(RIGHT), d, c);
+    }
+    else
+    {
+        d = r->data();
+        c = r->count();
+        node<data_type> *delete_ptr = r;
+        r = r->child(LEFT);
+        delete delete_ptr;
+    }
+}
+
 
 template <typename data_type>
 int bst<data_type>::depth(const node<data_type>* r) const
@@ -351,7 +368,5 @@ void bst<data_type>::compression ( node<data_type>* &root, int count )
         scanner->child(LEFT) = child;
     }
 }
-
-
 
 #endif // BST
